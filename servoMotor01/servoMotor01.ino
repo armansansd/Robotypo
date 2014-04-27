@@ -1,78 +1,77 @@
-// Project 30 - Line Following Robot
-
 int LDR1, LDR2, LDR3;
+int leftOffset = 0, rightOffset = 0, centre = 0, leftTest = 0, rightTest = 0, centreTest = 0;
+int motorRight = 9, motorLeft = 10 ;
+int right = 180, left = 180, rightSlow=80, leftSlow=80; 
 
-//calib
-int leftOffset = 0, rightOffset = 0, centre = 0;
-// pins for motor speed and direction
-int speed1 = 9, speed2 = 10 ;
-// starting speed and rotation offset
-int startSpeed = 130, rotate = 30;
-// sensor threshold
-int threshhold = 5;
-// initial speeds of left and right motors
-int left = startSpeed, right = startSpeed;
 
-// Sensor calibration routine
-void calibrate() {
+void calibrate(){
 
-  for (int x=0; x<10; x++) { // run this 10 times to obtain average
-
-  delay(100);
-  LDR1 = analogRead(0); // read the 3 sensors
-//  LDR2 = analogRead(1);
-  LDR3 = analogRead(2);
-  leftOffset = leftOffset + LDR1; // add value of left sensor to total
-  centre = centre + LDR2; // add value of centre sensor to total
-  rightOffset = rightOffset + LDR3; // add value of right sensor to total
-  delay(100);
-
+  for (int x=0; x<10; x++) {
+    delay(100);
+    //trouver la val min et max exact
+    LDR1 = map(analogRead(0),0,900,0,255);
+    LDR2 = map(analogRead(1),0,900,0,255);
+    LDR3 = map(analogRead(2),0,900,0,255);
+    
+    leftOffset = leftOffset + LDR1;
+    centre = centre + LDR2;
+    rightOffset = rightOffset + LDR3;
+    delay(100);
   }
-  // obtain average for each sensor
   leftOffset = leftOffset / 10; 
   rightOffset = rightOffset / 10;
-  
-  }
-
-void setup()
-{
-    // set the motor pins to outputs
-    pinMode(speed1, OUTPUT); 
-    pinMode(speed2, OUTPUT);
-    // calibrate the sensors
-    calibrate();
-    delay(3000);
-     
-    // set speed of both motors
-  analogWrite(speed1,left); 
-  analogWrite(speed2,right);
-    Serial.begin(9600);
+  centre = centre / 10;
 }
 
-void loop() {
-  
-  // make both motors same speed
-   left = startSpeed;
-   right = startSpeed;
-    
-  // read the sensors and add the offsets
-  LDR1 = analogRead(0) + leftOffset;
-//  LDR2 = analogRead(1);
-  LDR3 = analogRead(2) + rightOffset;
-  Serial.println(LDR3);
-  // if LDR1 is greater than the centre sensor + threshold turn right
-  if (LDR1 > LDR3) {
-    left = startSpeed + rotate;
-    right = startSpeed - rotate; 
-  } 
-  
-  // if LDR3 is greater than the centre sensor + threshold turn left
-  if (LDR3 > LDR1) {
-    left = startSpeed - rotate;
-    right = startSpeed + rotate; 
+void test(){
+  for (int y=0; y<5; y++){
+    LDR1 = map(analogRead(0),0,900,0,255);
+    LDR2 = map(analogRead(1),0,900,0,255);
+    LDR3 = map(analogRead(2),0,900,0,255);
+       
+    leftTest = leftTest + LDR1;
+    centreTest = centreTest + LDR2;
+    rightTest = rightTest + LDR3;   
   }
-    // send the speed values to the motors
-    analogWrite(speed1,left); 
-    analogWrite(speed2,right);
+  
+  leftTest = leftTest / 5; 
+  centreTest = centreTest/ 5;
+  rightTest = rightTest / 5;
 }
+
+void setup(){
+  pinMode(motorRight, OUTPUT); 
+  pinMode(motorLeft, OUTPUT);
+  //turn on a redled
+  calibrate();
+  delay(1000);
+  //turn on a green led
+  Serial.begin(9600);
+}
+
+void loop() {  
+  
+  test();
+
+  if(leftOffset>leftTest){
+    right=rightSlow;
+  }else if(leftOffset>leftTest && centre > centreTest){
+    right = 0;
+  }else{
+    right = right;
+  }
+  
+  if(rightOffset>rightTest){
+    left=leftSlow;
+  }else if(rightOffset>rightTest && centre > centreTest){
+    left = 0;
+  }else{
+    left = left;
+  }
+  
+  analogWrite(motorRight,left); 
+  analogWrite(motorLeft,right);
+}
+
+
 
