@@ -1,37 +1,82 @@
-int LDR1, LDR2, LDR3;
-int leftOffset = 0, rightOffset = 0, centre = 0, leftTest = 0, rightTest = 0, centreTest = 0;
+int ledR = 13, ledO = 12, ledV =8;
 int motorRight = 9, motorLeft = 10 ;
-int right = 100, left = 200, rightSlow=80, leftSlow=80; 
-int LDR1max, LDR1min, LDR3max, LDR3min;
-int LDR1comp,LDR3comp;
+//capteurs
+int LDR1, LDR2, LDR3;
+int LDR1test, LDR3test, LDR1max, LDR1min, LDR3max, LDR3min, LDR1comp, LDR3comp;
 
 void calibrate(){
-  LDR1max = analogRead(0);
-  LDR1min = LDR1max-300;
-  LDR3max = analogRead(2);
-  LDR3min = LDR3max-300;
- 
-  LDR1comp=map(analogRead(0),LDR1min,LDR1max,0,255);
+  digitalWrite(ledR,HIGH);
+  delay(3000);
+  for(int i=0; i<5; i++){
+    LDR1 = analogRead(0);
+    LDR3 = analogRead(2);
+    LDR1test = LDR1test + LDR1;
+    LDR3test = LDR3test + LDR3;
+   }
   
+  LDR1max = LDR1test/5;
+  LDR3max = LDR3test/5;
+  
+  
+  digitalWrite(ledR,LOW);
+  //reset test ? 
+  LDR1test = 0;
+  LDR3test = 0;
+  digitalWrite(ledO,HIGH);
+  delay(3000);
+  for(int j=0; j<5; j++){
+    LDR1 = analogRead(0);
+    LDR3 = analogRead(2);
+    LDR1test = LDR1test + LDR1;
+    LDR3test = LDR3test + LDR3;
+  }
+  LDR1min = LDR1test/5;
+  LDR3min = LDR3test/5;
+  
+  digitalWrite(ledO,LOW);
+
+  digitalWrite(ledV,HIGH);
 }
 
-
-
 void setup(){
+  Serial.begin(9600);
+  pinMode(ledR,OUTPUT);
+  pinMode(ledO,OUTPUT);
+  pinMode(ledV, OUTPUT);
   pinMode(motorRight, OUTPUT); 
   pinMode(motorLeft, OUTPUT);
   calibrate();
-  delay(1000);
-  Serial.begin(9600);
-  Serial.print(LDR1comp);
+  delay(3000);
+  LDR1comp = map(analogRead(0),LDR1min,LDR1max,0,255)-10;
+  LDR3comp = map(analogRead(2),LDR3min,LDR3max,0,255)-10;
+  
+}
+
+void loop() {
+  LDR1 = map(analogRead(0),LDR1min,LDR1max,0,255);
+  LDR3 = map(analogRead(2),LDR3min,LDR3max,0,255);
+  
+ 
+  if(LDR3<LDR3comp){
+    motorLeftOff();
+    motorRightOn();
+  }
+  else if(LDR1<LDR1comp){
+    motorLeftOn();
+    motorRightOff();
+  }else{
+    motorLeftOn();
+    motorRightOn();
+ }
+
 }
 
 void motorLeftOn(){
-  analogWrite(motorLeft,170);
+  analogWrite(motorLeft,110);
 }
 
 void motorRightOn(){
-  analogWrite(motorRight,110);
+  analogWrite(motorRight,100);
 }
 
 void motorRightOff(){
@@ -40,23 +85,4 @@ void motorRightOff(){
 void motorLeftOff(){
   analogWrite(motorLeft,0);
 }
-
-void loop() { 
-  
-  LDR1 = map(analogRead(0),LDR1min,LDR1max,0,255);
-  LDR3 = map(analogRead(2),LDR3min,LDR3max,0,255); 
-  
-  if(LDR1<190){
-    motorLeftOn();
-    motorRightOff();
-  }else if(LDR3<220){
-    motorLeftOff();
-    motorRightOn();
-  }else{
-    motorLeftOn();
-    motorRightOn();
-  }
-
-}
-
 
