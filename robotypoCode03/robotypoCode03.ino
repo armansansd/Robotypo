@@ -1,51 +1,53 @@
 int LDR1, LDR2, LDR3; // sensor values
+int LDR1max, LDR1min, LDR2max, LDR2min,LDR3max,LDR3min;
 int ledR = 13, ledO = 12, ledV =8;
-// calibration offsets
-int leftOffset = 0, rightOffset = 0, centre = 0;
-// pins for motor speed and direction
 int speed1 = 9, speed2 = 10 ;
-// starting speed and rotation offset
 int startSpeed = 95, rotate = 5;
-// sensor threshold
 int threshhold = 10;
-// initial speeds of left and right motors
 int left = startSpeed, right = startSpeed;
 
-// Sensor calibration routine
+// Sensor calibration
 void calibrate() {
-
-  for (int x=0; x<10; x++) { // run this 10 times to obtain average
-  digitalWrite(ledR, HIGH); // lights on
-  delay(100);
-  LDR1 = analogRead(0); // read the 3 sensors
+  digitalWrite(ledR, HIGH);
+  delay(3000);
+  for (int x=0; x<10; x++) {
+  LDR1 = analogRead(0);
   LDR2 = analogRead(1);
   LDR3 = analogRead(2);
-  leftOffset = leftOffset + LDR1; // add value of left sensor to total
-  centre = centre + LDR2; // add value of centre sensor to total
-  rightOffset = rightOffset + LDR3; // add value of right sensor to total
+  LDR1max = LDR1max+LDR1;
+  LDR2max = LDR2max+LDR2;
+  LDR3max = LDR3max+LDR3;
+  }
+  LDR1max = LDR1max/10;
+  LDR2max = LDR2max/10;
+  LDR3max = LDR3max/10;
+  digitalWrite(ledR, LOW);
+  digitalWrite(ledO, HIGH);
   
-  delay(100);
-  digitalWrite(ledR, LOW); // lights off
-  delay(100);
+  delay(3000);
+  
+  for (int x=0; x<10; x++) {
+  LDR1 = analogRead(0);
+  LDR2 = analogRead(1);
+  LDR3 = analogRead(2);
+  LDR1min = LDR1min+LDR1;
+  LDR2min = LDR2min+LDR2;
+  LDR3min = LDR3min+LDR3;
   }
-  // obtain average for each sensor
-  leftOffset = leftOffset / 10; 
-  rightOffset = rightOffset / 10;
-  centre = centre /10;  
-  // calculate offsets for left and right sensors
-  leftOffset = centre - leftOffset;
-  rightOffset = centre - rightOffset;
-  }
+  LDR1min = LDR1min/10;
+  LDR2min = LDR2min/10;
+  LDR3min = LDR3min/10;
+  digitalWrite(ledO, LOW);
+  digitalWrite(ledV, HIGH);
+}
 
-void setup()
-{
-    // set the motor pins to outputs
+void setup(){
     pinMode(ledR,OUTPUT);
     pinMode(ledO,OUTPUT);
     pinMode(ledV, OUTPUT);
     pinMode(speed1, OUTPUT); 
     pinMode(speed2, OUTPUT);
-    // calibrate the sensors
+    
     calibrate();
     delay(3000);
     digitalWrite(ledV, HIGH);
@@ -60,9 +62,9 @@ void loop() {
   left = startSpeed;
   right = startSpeed;
   //read sensor
-  LDR1 = analogRead(0);
-  LDR2 = analogRead(1);
-  LDR3 = analogRead(2);
+  LDR1 = map(analogRead(0),LDR1min,LDR1min,0,255);
+  LDR2 = map(analogRead(1),LDR2min,LDR2max,0,255);
+  LDR3 = map(analogRead(2),LDR3min,LDR3max,0,255);
   
   // if LDR1 is greater than the centre sensor + threshold turn right
   if (LDR1 > (LDR2+threshhold)) {
