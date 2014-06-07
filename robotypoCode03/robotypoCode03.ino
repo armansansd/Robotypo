@@ -2,8 +2,8 @@ int LDR1, LDR2, LDR3; // sensor values
 int LDR1max, LDR1min, LDR2max, LDR2min,LDR3max,LDR3min;
 int ledR = 13, ledO = 12, ledV =8;
 int speed1 = 9, speed2 = 10 ;
-int startSpeed = 95, rotate = 5;
-int threshhold = 10;
+int startSpeed = 150;
+int threshhold = 5;
 int left = startSpeed, right = startSpeed;
 
 // Sensor calibration
@@ -48,7 +48,7 @@ void setup(){
     pinMode(speed1, OUTPUT); 
     pinMode(speed2, OUTPUT);
     
-    calibrate();
+   // calibrate();
     delay(3000);
     digitalWrite(ledV, HIGH);
     delay(100);
@@ -62,9 +62,13 @@ void loop() {
   left = startSpeed;
   right = startSpeed;
   //read sensor
-  LDR1 = map(analogRead(0),LDR1min,LDR1min,0,255);
-  LDR2 = map(analogRead(1),LDR2min,LDR2max,0,255);
-  LDR3 = map(analogRead(2),LDR3min,LDR3max,0,255);
+//  LDR1 = map(analogRead(0),LDR1min,LDR1max,0,255);
+//  LDR2 = map(analogRead(1),LDR2min,LDR2max,0,255);
+//  LDR3 = map(analogRead(2),LDR3min,LDR3max,0,255);
+  
+  LDR1 = analogRead(0);
+  LDR2 = analogRead(1);
+  LDR3 = analogRead(2);
   
   // if LDR1 is greater than the centre sensor + threshold turn right
   if (LDR1 > (LDR2+threshhold)) {
